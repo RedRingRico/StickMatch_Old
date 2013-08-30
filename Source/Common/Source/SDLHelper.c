@@ -42,6 +42,16 @@ SDL_Surface *SDLH_LoadImage( const char *p_pFileName,
 	return pOptimisedImage;
 }
 
+void SDLH_ApplySurface( const int p_X, const int p_Y, SDL_Surface *p_pSource,
+	SDL_Surface *p_pDestination, SDL_Rect *p_pClip )
+{
+	SDL_Rect Offset;
+	Offset.x = p_X;
+	Offset.y = p_Y;
+
+	SDL_BlitSurface( p_pSource, p_pClip, p_pDestination, &Offset );
+}
+
 void SDLH_ClearColourKey( COLOUR_KEY p_ColourKey )
 {
 	memset( &p_ColourKey, 0x00, sizeof( COLOUR_KEY ) );
