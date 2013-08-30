@@ -50,5 +50,5 @@ local.properties
 *.docstates
 
 # Git version header #
-GitVersion.hpp
+GitVersion.h*
 

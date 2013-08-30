@@ -1,0 +1,20 @@
+After going through the code, here are my initial thoughts on how to proceed
+improving upon what's available
+
+* The whole game should be in C
+* Stick figures should not be completely separate classes, they shoudld be
+  modified via their properties.
+* Timer should be changed from using the SDL_GetTicks function to using the
+  native OS's high-resolution timer for microsecond resolution.
+* The Health_Status member function in RedStick and BlueStick is terribly
+  constructed.  Scaling the health bar would be much better for performance.
+* Header guards are not present, they should be.
+* Using a fixed-timestep instead of waiting for the main loop to complete
+  before blanking the screen would be ideal.
+* Using a text-based format for defining the stick fighters would help with
+  testing without re-compiling.
+* Animations should be loaded from file, perhaps with the stick fighter
+  definition file.
+* Add a Linux build
+* It would be nice to do all of this in 3D
+* The error and output log files should be dumped in the executable's directory
