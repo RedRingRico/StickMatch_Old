@@ -19,7 +19,7 @@ BUILD_ARCH		:= X86
 ARCH			:= x86
 BITSIZE			:= 32
 
-GCCVER	= $(shell $(CPP) -dumpversion)
+GCCVER	= $(shell $(CC) -dumpversion)
 
 BUILD_TYPE := debug
 
@@ -31,7 +31,7 @@ UNAME			= $(shell uname)
 UNAME_MACHINE	= $(shell uname -m)
 
 ifeq ($(UNAME), Linux)
-	CPPFLAGS_EXT	= -ffriend-injection -std=c++0x
+	CFLAGS_EXT	= 
 	SYSIPATH	= -I/usr/include/xorg
 	SYSLIBS		= -lX11 -lGL -lrt
 	LINKFLAGS	=
@@ -57,9 +57,9 @@ endif
 endif
 endif
 
-CPP = g++
+CC = gcc
 
-CPPFLAGS	=	-c -m$(BITSIZE) -DZED_BUILD_$(BUILD_DEF) \
+CFLAGS	=	-c -m$(BITSIZE) -DZED_BUILD_$(BUILD_DEF) \
 				-DZED_PLATFORM_$(BUILD_PLATFORM) \
 				-DZED_PLATFORM_$(BUILD_PLATFORM)_$(BUILD_ARCH) \
 				-DZED_PLATFORM_$(BUILD_PLATFORM)_$(BUILD_ARCH)_$(BITSIZE) \
@@ -77,7 +77,7 @@ debug:		BUILD		= Debug
 debug:		BUILD_TYPE	= debug
 debug:		BUILD_DEF	= DEBUG
 debug:		TARGET := $(TARGET)D
-debug:		CPPFLAGS += -g -ggdb -Wall -D_DEBUG $(CPPFLAGS_EXT)
+debug:		CFLAGS += -g -ggdb -Wall -D_DEBUG $(CFLAGS_EXT)
 debug:		LIBS =
 debug:		$(TARGET)
 
@@ -86,7 +86,7 @@ release:	BUILD		= Release
 release:	BUILD_TYPE	= release
 release:	BUILD_DEF	= RELEASE
 release:	TARGET := $(TARGET)
-release:	CPPFLAGS += -O3 $(CPPFLAGS_EXT)
+release:	CFLAGS += -O3 $(CFLAGS_EXT)
 release:	LIBS =
 release:	LINKFLAGS += -Wl,-S
 release:	$(TARGET)
@@ -96,7 +96,7 @@ profile:	BUILD		= Profile
 profile:	BUILD_TYPE	= profile
 profile:	BUILD_DEF	= PROFILE
 profile:	TARGET := $(TARGET)P
-profile:	CPPFLAGS += -O3 -g -ggdb -Wall -D_DEBUG $(CPPFLAGS_EXT)
+profile:	CFLAGS += -O3 -g -ggdb -Wall -D_DEBUG $(CFLAGS_EXT)
 profile:	LIBS =
 profile:	$(TARGET)
 
@@ -117,9 +117,9 @@ TARGETDIR:
 OBJSDIR:
 	@mkdir -p $(OBJSDIR)
 
-CPPFILES	:= $(foreach dir,$(SOURCEDIR),$(notdir $(wildcard $(dir)/*.cpp)))
+CFILES	:= $(foreach dir,$(SOURCEDIR),$(notdir $(wildcard $(dir)/*.c)))
 export VPATH	:= $(foreach dir,$(SOURCEDIR),$(CURDIR)/$(dir))
-export OBJS		:= $(CPPFILES:.cpp=.o)
+export OBJS		:= $(CFILES:.c=.o)
 
 $(TARGET): OBJSDIR TARGETDIR VERSIONINFO
 	@/usr/bin/time -f "%E" -o $(OBJSDIR)/compiletime $(MAKE) \
@@ -144,7 +144,7 @@ $(TARGET): $(OBJS)
 	@printf "%s" "------------------------------------------------------------"
 	@printf "%s\n\n" "-------------------"
 	@printf "Creating: $(OUTFILE)... "
-	@$(CPP) -o $(OUTFILE) $(LINKFLAGS) -m$(BITSIZE) $(OBJS) $(SYSLPATH) \
+	@$(CC) -o $(OUTFILE) $(LINKFLAGS) -m$(BITSIZE) $(OBJS) $(SYSLPATH) \
 	$(LIBPATH) $(LIBS) $(SYSLIBS) 2> lmsgs;\
 	RETVAL=$$?;\
 	cat lmsgs | sed ''/error/s//`printf "\033[31merror\033[0m"`/'' > lmsgs;\
@@ -160,9 +160,9 @@ $(TARGET): $(OBJS)
 		exit 1;\
 	fi
 
-%.o: %.cpp
+%.o: %.c
 	@printf "Compiling: $<... "
-	@$(CPP) -MMD -MP -MF $*.d $(CPPFLAGS) $(SYSIPATH) $(INCPATH) \
+	@$(CC) -MMD -MP -MF $*.d $(CFLAGS) $(SYSIPATH) $(INCPATH) \
 	$< -o $@ 2> $*.cmsgs;\
 	RETVAL=$$?;\
 	cat $*.cmsgs | sed ''/error/s//`printf "\033[31merror\033[0m"`/'' > $*.cmsgs;\
